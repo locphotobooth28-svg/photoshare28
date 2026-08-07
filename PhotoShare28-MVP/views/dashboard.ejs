@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include("partials-head") %>
+  <title>Tableau de bord · PhotoShare 28</title>
+</head>
+<body>
+  <main class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="brand">📸 PhotoShare 28</div>
+        <div class="muted">Location Photobooth 28</div>
+      </div>
+      <form method="post" action="/admin/logout"><button class="btn ghost">Déconnexion</button></form>
+    </div>
+
+    <div class="grid">
+      <div class="stat"><span class="muted">Événements</span><strong><%= events.length %></strong></div>
+      <div class="stat"><span class="muted">Photos / vidéos</span><strong><%= photoCount %></strong></div>
+      <div class="stat"><span class="muted">Google Drive</span><strong style="font-size:20px"><%= driveConfigured ? "Connecté ✓" : "À configurer" %></strong></div>
+    </div>
+
+    <section class="card" style="margin-top:18px">
+      <div class="topbar" style="margin-bottom:10px">
+        <div><h2 style="margin:0">Mes événements</h2></div>
+        <a class="btn" href="/admin/events/new">+ Nouvel événement</a>
+      </div>
+      <% if (!events.length) { %>
+        <p class="muted">Aucun événement pour le moment. Crée ton premier événement de test.</p>
+      <% } else { %>
+        <table>
+          <thead><tr><th>Événement</th><th>Date</th><th>Photos</th><th></th></tr></thead>
+          <tbody>
+          <% events.forEach(event => { %>
+            <tr>
+              <td><strong><%= event.name %></strong><br><span class="muted"><%= event.type %></span></td>
+              <td><%= event.date %></td>
+              <td><%= event.photos.length %></td>
+              <td><a href="/admin/events/<%= event.code %>">Ouvrir →</a></td>
+            </tr>
+          <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </section>
+  </main>
+</body>
+</html>

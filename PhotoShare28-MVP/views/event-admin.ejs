@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include("partials-head") %>
+  <title><%= event.name %> · PhotoShare 28</title>
+</head>
+<body>
+  <main class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="brand">📸 PhotoShare 28</div>
+        <div class="muted"><%= event.name %></div>
+      </div>
+      <a href="/admin">← Tableau de bord</a>
+    </div>
+
+    <div class="grid">
+      <div class="stat"><span class="muted">Photos / vidéos</span><strong><%= event.photos.length %></strong></div>
+      <div class="stat"><span class="muted">Date</span><strong style="font-size:20px"><%= event.date %></strong></div>
+      <div class="stat"><span class="muted">Drive</span><strong style="font-size:20px"><%= event.drive ? "Dossiers créés ✓" : (driveConfigured ? "Non créé" : "Mode test") %></strong></div>
+    </div>
+
+    <section class="card" style="margin-top:18px">
+      <h2>QR Code invité</h2>
+      <div class="grid" style="grid-template-columns:280px 1fr">
+        <div><img class="qr" src="<%= qrDataUrl %>" alt="QR Code de la galerie"></div>
+        <div>
+          <p><strong>Lien public</strong></p>
+          <div class="code"><%= guestUrl %></div>
+          <p><strong>Code événement</strong></p>
+          <div class="code"><%= event.code %></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>API pour une borne</h2>
+      <p class="muted">Endpoint prévu pour l'envoi automatique d'une photo.</p>
+      <div class="code">POST <%= guestUrl.replace('/e/', '/api/events/') %>/upload</div>
+      <p><strong>En-tête :</strong></p>
+      <div class="code">X-API-Key: <%= event.apiKey %></div>
+      <p class="muted">Champ multipart du fichier : <strong>photo</strong>. Champ optionnel : <strong>source</strong> (Lola, Nina, Gabin).</p>
+    </section>
+
+    <section class="card">
+      <h2>Derniers fichiers</h2>
+      <% if (!event.photos.length) { %>
+        <p class="muted">Aucun fichier envoyé.</p>
+      <% } else { %>
+        <table>
+          <thead><tr><th>Nom</th><th>Source</th><th>Stockage</th></tr></thead>
+          <tbody>
+          <% event.photos.slice(0,30).forEach(photo => { %>
+            <tr><td><%= photo.originalName %></td><td><%= photo.source %></td><td><%= photo.storage %></td></tr>
+          <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </section>
+  </main>
+</body>
+</html>
