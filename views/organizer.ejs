@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fr">
+<head><%- include("partials-head") %><title>Espace organisateur · <%= event.name %></title></head>
+<body>
+<main class="wrap" style="max-width:1050px">
+  <section class="organizer-header">
+    <div>
+      <div class="brand">📸 PhotoShare 28</div>
+      <h1>Espace organisateur</h1>
+      <p class="muted"><%= event.name %> · <%= event.date %></p>
+    </div>
+    <div class="expiry-chip">Disponible jusqu'au <strong><%= new Date(event.expiresAt).toLocaleDateString("fr-FR") %></strong></div>
+  </section>
+
+  <div class="grid">
+    <div class="stat"><span class="muted">Souvenirs</span><strong><%= event.photos.length %></strong></div>
+    <div class="stat"><span class="muted">Photos</span><strong><%= event.photos.filter(p => p.mimeType && p.mimeType.startsWith("image/")).length %></strong></div>
+    <div class="stat"><span class="muted">Vidéos</span><strong><%= event.photos.filter(p => p.mimeType && p.mimeType.startsWith("video/")).length %></strong></div>
+  </div>
+
+  <section class="card" style="margin-top:18px">
+    <h2>🔗 Partager avec vos invités</h2>
+    <div class="organizer-share">
+      <img class="qr organizer-qr" src="<%= qrDataUrl %>" alt="QR Code invités">
+      <div>
+        <div class="code"><%= guestUrl %></div>
+        <button id="copyGuest" class="btn secondary" type="button" style="margin-top:12px">Copier le lien invité</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="topbar" style="margin-bottom:12px">
+      <div>
+        <h2 style="margin:0">📥 Vos souvenirs</h2>
+        <p class="muted" style="margin:4px 0 0">Accès complet réservé à l'organisateur.</p>
+      </div>
+      <% if (event.photos.length) { %>
+        <a class="btn" href="/o/<%= event.code %>/<%= event.organizerToken %>/download-all">Télécharger tout (.ZIP)</a>
+      <% } %>
+    </div>
+
+    <% if (!event.photos.length) { %>
+      <p class="muted">Aucun souvenir n'a encore été ajouté.</p>
+    <% } else { %>
+      <div class="organizer-list">
+      <% event.photos.forEach(photo => { %>
+        <article class="organizer-file">
+          <div class="organizer-preview">
+            <% if (photo.mimeType && photo.mimeType.startsWith("image/")) { %>
+              <img loading="lazy" src="/e/<%= event.code %>/media/<%= photo.id %>" alt="Photo de la galerie">
+            <% } else { %>
+              <div class="video-placeholder">🎥</div>
+            <% } %>
+          </div>
+          <div class="organizer-file-info">
+            <strong><%= photo.originalName %></strong>
+            <span class="muted"><%= photo.source === "invite" ? "Invité" : photo.source %></span>
+            <a class="btn secondary" href="/o/<%= event.code %>/<%= event.organizerToken %>/download/<%= photo.id %>">Télécharger</a>
+          </div>
+        </article>
+      <% }) %>
+      </div>
+    <% } %>
+  </section>
+</main>
+<script>
+document.getElementById("copyGuest")?.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText("<%= guestUrl %>");
+    document.getElementById("copyGuest").textContent = "Lien copié ✓";
+  } catch {}
+});
+</script>
+</body></html>
