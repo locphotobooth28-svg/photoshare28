@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="fr">
+<head><%- include("partials-head") %><title><%= event.name %> · PhotoShare 28</title></head>
+<body>
+<main class="wrap">
+  <%- include("brand-bar") %>
+  <div class="topbar">
+    <div><div class="brand">📸 LOCATION PHOTOBOOTH 28</div><div class="muted"><%= event.name %></div></div>
+    <a href="/admin">← Tableau de bord</a>
+  </div>
+
+  <% if (expired) { %><div class="notice error">⏳ Cette galerie a dépassé sa période de 30 jours.</div><% } %>
+
+  <div class="grid">
+    <div class="stat"><span class="muted">Souvenirs</span><strong><%= event.photos.length %></strong></div>
+    <div class="stat"><span class="muted">Date</span><strong style="font-size:20px"><%= event.date %></strong></div>
+    <div class="stat"><span class="muted">Expiration</span><strong style="font-size:18px"><%= new Date(event.expiresAt).toLocaleDateString("fr-FR") %></strong></div>
+  </div>
+
+  <section class="card" style="margin-top:18px">
+    <h2>📱 Accès invités</h2>
+    <p class="muted">Ajout de photos + consultation de la galerie. Aucun bouton de téléchargement.</p>
+    <div class="organizer-share">
+      <img class="qr" src="<%= qrDataUrl %>" alt="QR Code invités">
+      <div>
+        <div class="code"><%= guestUrl %></div>
+        <button class="btn secondary copy-btn" type="button" data-copy="<%= guestUrl %>" style="margin-top:10px">Copier le lien invité</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>👰 Accès organisateur</h2>
+    <p class="muted">Lien privé à remettre uniquement au client organisateur.</p>
+    <div class="code"><%= organizerUrl %></div>
+    <button class="btn secondary copy-btn" type="button" data-copy="<%= organizerUrl %>" style="margin-top:10px">Copier le lien organisateur</button>
+  </section>
+
+  <section class="card">
+    <h2>📄 Dossier client</h2>
+    <% if (typeof saved !== "undefined") { %><div class="notice">Informations enregistrées.</div><% } %>
+
+    <form method="post" action="/admin/events/<%= event.code %>/client-status">
+      
+      <h3>Matériel et options choisis par le client</h3>
+      <p class="muted">Coche uniquement ce qui est prévu pour cette prestation. Le client ne verra que les éléments sélectionnés.</p>
+
+      <% const selectedInventory = event.inventory || []; %>
+
+      <div class="inventory-admin-groups">
+        <div class="inventory-admin-group">
+          <h4>📸 Bornes & prise de vue</h4>
+          <% [
+            "Borne Photobooth Miroir Lola",
+            "Borne Photobooth Nina",
+            "Borne Photobooth Gabin",
+            "Appareil photo Reflex Nikon D7200",
+            "Flash + parapluie"
+          ].forEach(item => { %>
+            <label class="option-check">
+              <input type="checkbox" name="inventory" value="<%= item %>" <%= selectedInventory.includes(item) ? "checked" : "" %>>
+              <span><%= item %></span>
+            </label>
+          <% }) %>
+        </div>
+
+        <div class="inventory-admin-group">
+          <h4>🖨️ Forfait impressions</h4>
+          <% [
+            "Forfait sans aucune impression",
+            "Forfait 100 impressions",
+            "Forfait 200 impressions",
+            "Forfait 300 impressions",
+            "Forfait 400 impressions",
+            "Forfait 700 impressions"
+          ].forEach(item => { %>
+            <label class="option-check">
+              <input type="checkbox" name="inventory" value="<%= item %>" <%= selectedInventory.includes(item) ? "checked" : "" %>>
+              <span><%= item %></span>
+            </label>
+          <% }) %>
+        </div>
+
+        <div class="inventory-admin-group">
+          <h4>🎉 Options & animations</h4>
+          <% [
+            "Location livre d'or audio",
+            "Location Fontaine + 1 ou 2 contenant de 30L",
+            "Location enceinte LG 1000w + 2 micros",
+            "Location 2 micros JBL",
+            "Location Écran Karaoké",
+            "Location Écran Karaoké + enceinte + 2 micros",
+            "Location Kit Jet d'étincelle",
+            "6 Poteaux + corde",
+            "6 Poteaux + corde avec tapis rouge de cérémonie"
+          ].forEach(item => { %>
+            <label class="option-check">
+              <input type="checkbox" name="inventory" value="<%= item %>" <%= selectedInventory.includes(item) ? "checked" : "" %>>
+              <span><%= item %></span>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+
+<div class="check-grid">
+        <label class="check-line">
+          <input type="checkbox" name="depositReceived" <%= event.depositReceived ? "checked" : "" %>>
+          <span>Chèque de caution reçu</span>
+        </label>
+
+        <label class="check-line">
+          <input type="checkbox" name="invoicePaid" <%= event.invoicePaid ? "checked" : "" %>>
+          <span>Facture réglée</span>
+        </label>
+      </div>
+
+      <button class="btn" type="submit">Enregistrer le dossier client</button>
+    </form>
+
+    <hr class="soft-rule">
+
+    
+    <h3>Contrat PDF</h3>
+
+    <% if (event.contract) { %>
+      <div class="notice">✅ Contrat disponible : <strong><%= event.contract.originalName %></strong></div>
+      <% if (event.contractSignature && event.contractSignature.signedAt) { %>
+        <div class="notice">
+          ✍️ Contrat validé par <strong><%= event.contractSignature.signerName %></strong>
+          le <%= new Date(event.contractSignature.signedAt).toLocaleString("fr-FR") %>.
+        </div>
+      <% } else { %>
+        <p class="muted">En attente de validation/signature par l'organisateur.</p>
+      <% } %>
+    <% } else { %>
+      <p class="muted">Aucun contrat déposé.</p>
+    <% } %>
+
+    <form method="post" enctype="multipart/form-data" action="/admin/events/<%= event.code %>/contract">
+      <input name="contract" type="file" accept="application/pdf,.pdf" required>
+      <button class="btn secondary" type="submit" style="margin-top:12px">Déposer / remplacer le contrat</button>
+    </form>
+
+    <hr class="soft-rule">
+
+<h3>Facture PDF</h3>
+    <% if (event.invoice) { %>
+      <div class="notice">✅ Facture disponible : <strong><%= event.invoice.originalName %></strong></div>
+    <% } else { %>
+      <p class="muted">Aucune facture déposée.</p>
+    <% } %>
+
+    <form method="post" enctype="multipart/form-data" action="/admin/events/<%= event.code %>/invoice">
+      <input name="invoice" type="file" accept="application/pdf,.pdf" required>
+      <button class="btn secondary" type="submit" style="margin-top:12px">Déposer / remplacer la facture</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>📷 API borne</h2>
+    <div class="code">POST <%= guestUrl.replace('/e/', '/api/events/') %>/upload</div>
+    <p><strong>En-tête :</strong></p>
+    <div class="code">X-API-Key: <%= event.apiKey %></div>
+  </section>
+  <%- include("brand-footer") %>
+</main>
+
+<script>
+document.querySelectorAll(".copy-btn").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(btn.dataset.copy);
+      const old = btn.textContent;
+      btn.textContent = "Copié ✓";
+      setTimeout(() => btn.textContent = old, 1500);
+    } catch {}
+  });
+});
+</script>
+</body></html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include("partials-head") %>
+  <title><%= event.name %> · Location Photobooth 28</title>
+</head>
+<body class="guest-page">
+<main class="wrap" style="max-width:1000px">
+
+  <%- include("brand-bar") %>
+
+  <section class="hero event-hero">
+    <h1><%= event.name %></h1>
+    <p class="muted"><%= event.type %> · <%= event.date %></p>
+    <p>Partagez vos plus beaux souvenirs ❤️</p>
+  </section>
+
+  <% if (uploaded) { %>
+    <div class="notice">✅ Merci ! Vos souvenirs ont bien été ajoutés.</div>
+  <% } %>
+
+  <% if (error) { %>
+    <div class="notice error"><%= error %></div>
+  <% } %>
+
+  <section class="card">
+    <h2>📤 Ajouter mes photos</h2>
+    <p class="muted">Vous pouvez sélectionner jusqu'à 30 photos ou vidéos à la fois.</p>
+    <form method="post" enctype="multipart/form-data" action="/e/<%= event.code %>/upload">
+      <input name="photos" type="file" accept="image/*,video/*" multiple required>
+      <button class="btn" type="submit" style="margin-top:14px">Envoyer mes souvenirs</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="gallery-head">
+      <div>
+        <h2 style="margin:0">🖼️ Galerie</h2>
+        <p class="muted"><%= event.photos.length %> souvenir(s) partagé(s)</p>
+      </div>
+    </div>
+
+    <% const images = event.photos.filter(p => p.mimeType && p.mimeType.startsWith("image/")); %>
+
+    <% if (!images.length) { %>
+      <p class="muted">Soyez les premiers à partager une photo !</p>
+    <% } else { %>
+      <div class="photo-grid guest-gallery">
+        <% images.forEach(photo => { %>
+          <figure class="photo-tile">
+            <button class="photo-open" type="button" aria-label="Ouvrir la photo en plein écran">
+              <img
+                loading="lazy"
+                draggable="false"
+                src="/e/<%= event.code %>/media/<%= photo.id %>"
+                alt="Souvenir partagé">
+            </button>
+          </figure>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <p class="privacy-note">🔒 Consultation uniquement : aucun bouton de téléchargement n'est proposé aux invités.</p>
+  </section>
+
+  <section class="company-card">
+    <strong>Cette galerie est proposée par LOCATION PHOTOBOOTH 28</strong>
+    <p>Mariages • Anniversaires • Baptêmes • Événements d'entreprise</p>
+    <div class="company-actions">
+      <a class="btn secondary" href="https://www.locationphotobooth28.fr" target="_blank" rel="noopener">🌐 Découvrir notre site</a>
+      <a class="btn secondary" href="https://www.facebook.com/location.photobooth.28/" target="_blank" rel="noopener">
+        <span class="facebook-icon small" aria-hidden="true">f</span> Facebook
+      </a>
+    </div>
+  </section>
+
+  <%- include("brand-footer") %>
+</main>
+
+<div id="lightbox" class="lightbox" hidden aria-hidden="true">
+  <button id="lightboxClose" class="lightbox-close" type="button" aria-label="Fermer">×</button>
+  <img id="lightboxImage" src="" alt="Photo en plein écran" draggable="false">
+</div>
+
+<script>
+const lightbox = document.getElementById("lightbox");
+const lightboxImage = document.getElementById("lightboxImage");
+const lightboxClose = document.getElementById("lightboxClose");
+
+document.querySelectorAll(".photo-open img").forEach(img => {
+  img.parentElement.addEventListener("click", () => {
+    lightboxImage.src = img.src;
+    lightbox.hidden = false;
+    lightbox.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+  });
+});
+
+function closeLightbox() {
+  lightbox.hidden = true;
+  lightbox.setAttribute("aria-hidden", "true");
+  lightboxImage.src = "";
+  document.body.classList.remove("modal-open");
+}
+
+lightboxClose.addEventListener("click", closeLightbox);
+lightbox.addEventListener("click", event => {
+  if (event.target === lightbox) closeLightbox();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !lightbox.hidden) closeLightbox();
+});
+document.addEventListener("contextmenu", event => {
+  if (event.target && event.target.tagName === "IMG") event.preventDefault();
+});
+document.addEventListener("dragstart", event => {
+  if (event.target && event.target.tagName === "IMG") event.preventDefault();
+});
+</script>
+</body>
+</html>
