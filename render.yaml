@@ -9,7 +9,7 @@ services:
       - key: NODE_VERSION
         value: 20
       - key: APP_URL
-        sync: false
+        sync: https://photoshare28.onrender.com
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD
