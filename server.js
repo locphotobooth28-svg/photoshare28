@@ -134,7 +134,8 @@ app.post("/admin/events", adminOnly, async (req, res) => {
 app.get("/admin/events/:code", adminOnly, async (req, res) => {
   const event = store.getEventByCode(req.params.code);
   if (!event) return res.status(404).send("Événement introuvable");
-  const guestUrl = `${APP_URL}/e/${event.code}`;
+ const baseUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
+const guestUrl = `${baseUrl.replace(/\/$/, "")}/e/${event.code}`;
   const qrDataUrl = await QRCode.toDataURL(guestUrl, { width: 500, margin: 2 });
   res.render("event-admin", { event, guestUrl, qrDataUrl, driveConfigured: drive.isConfigured() });
 });
