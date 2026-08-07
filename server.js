@@ -12,6 +12,7 @@ const store = require("./lib/store");
 const drive = require("./services/drive");
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3000;
 const APP_URL = (process.env.APP_URL || `http://localhost:${PORT}`).replace(/\/$/, "");
 
@@ -41,7 +42,7 @@ app.use(session({
   cookie: {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: "auto",
     maxAge: 12 * 60 * 60 * 1000
   }
 }));
