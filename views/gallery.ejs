@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <%- include("partials-head") %>
+  <title><%= event.name %> · Galerie</title>
+</head>
+<body>
+  <main class="wrap" style="max-width:900px">
+    <section class="hero" style="padding-bottom:20px">
+      <div class="brand">📸 PhotoShare 28</div>
+      <h1><%= event.name %></h1>
+      <p class="muted"><%= event.type %> · <%= event.date %></p>
+      <p>Partagez vos plus beaux souvenirs avec nous ❤️</p>
+    </section>
+
+    <% if (uploaded) { %>
+      <div class="notice">✅ Merci ! Vos souvenirs ont bien été ajoutés.</div>
+    <% } %>
+    <% if (error) { %>
+      <div class="notice error"><%= error %></div>
+    <% } %>
+
+    <section class="card">
+      <h2>Ajouter mes photos et vidéos</h2>
+      <p class="muted">Sélectionnez jusqu'à 30 fichiers à la fois. Taille maximale : 25 Mo par fichier.</p>
+      <form method="post" enctype="multipart/form-data" action="/e/<%= event.code %>/upload">
+        <input name="photos" type="file" accept="image/*,video/*" multiple required>
+        <button class="btn" type="submit" style="margin-top:14px">📤 Envoyer mes souvenirs</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Galerie</h2>
+      <% const localImages = event.photos.filter(p => p.storage === "local" && p.mimeType.startsWith("image/")); %>
+      <% if (!event.photos.length) { %>
+        <p class="muted">Soyez les premiers à partager une photo !</p>
+      <% } else if (!localImages.length) { %>
+        <p class="muted"><%= event.photos.length %> fichier(s) enregistré(s). L'affichage direct des fichiers Google Drive sera ajouté à l'étape suivante.</p>
+      <% } else { %>
+        <div class="photo-grid">
+          <% localImages.slice(0,100).forEach(photo => { %>
+            <img loading="lazy" src="/uploads/<%= photo.localName %>" alt="Souvenir partagé">
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+  </main>
+</body>
+</html>
