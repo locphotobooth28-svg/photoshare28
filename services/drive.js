@@ -22,10 +22,21 @@ function driveClient() {
   const credentials = getCredentials();
   if (!credentials) throw new Error("Compte de service Google non configuré.");
 
-  const auth = new google.auth.GoogleAuth({
-    credentials,
-    scopes: ["https://www.googleapis.com/auth/drive"]
-  });
+const { google } = require("googleapis");
+
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET
+);
+
+oauth2Client.setCredentials({
+  refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+});
+
+const drive = google.drive({
+  version: "v3",
+  auth: oauth2Client,
+});
 
   return google.drive({ version: "v3", auth });
 }
